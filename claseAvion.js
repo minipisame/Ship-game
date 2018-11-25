@@ -4,7 +4,6 @@ var puntos = [];
 var disparos = [];
 var contadorp = 0;
 var contadora = 0;
-var muevebarra = false;
 var puntuacion = 0;
 // Clase avion que es nuestro personaje principal en este juego 
 class Avion {
@@ -20,6 +19,11 @@ class Avion {
 		this.avion.setAttribute("height",this.alto);
 		this.avion.setAttribute("id","av");
 		document.getElementById("svg").appendChild(this.avion);
+		  this.moviendoDerecha = false;
+        this.moviendoArriba = false;
+        this.moviendoIzquierda = false;
+        this.moviendoAbajo = false;
+        this.puedeDisparar = true;
 
 }
 
@@ -29,13 +33,48 @@ dibuja(){
 		this.avion.setAttribute("y",this.posy);
 	}
 
-	mueve(){
+ mover(direccion){
+        switch(direccion){
+            case "abajo":
+	if(avion.posy >= 550){
+	}
+	else{
+	avion.posy = avion.posy + 5;
+}
+
+                break;
+            case "arriba":
+            	if(avion.posy <= 0){
+	}
+	else{
+	avion.posy = avion.posy - 5;
+}
+                break;
+            case "izquierda":
+              if(avion.posx <= 0){
+	}
+	else{
+	avion.posx = avion.posx -5
+}
+                break;
+            case "derecha":
+              	if(avion.posx >= 550){
+	}
+	else{
+
+
+	avion.posx = avion.posx +5
+}
+                break;
+        }
+        avion.dibuja();
+    }
 
 
 	
 }
 // Clase disparo para eliminar objetos Asteroide
-}
+
 class disparo{
 	constructor(posx,posy,vx,vy,radio){
 		this.posx = posx;
@@ -72,6 +111,19 @@ if(this.posy <= -10){
 }
 	 
 
+}
+//Collision disparo con bala
+collisionDA(){
+	var circle1 = {radius: 20, x: 5, y: 5};
+var circle2 = {radius: 12, x: 10, y: 5};
+
+var dx = circle1.x - circle2.x;
+var dy = circle1.y - circle2.y;
+var distance = Math.sqrt(dx * dx + dy * dy);
+
+if (distance < circle1.radius + circle2.radius) {
+    // collision detected!
+}
 }
 
 	}
@@ -111,7 +163,7 @@ collisionAP(x){
 	
 
 
-		if(avion.posy <= this.posy && (avion.posx+50 >= this.posx && avion.posx <= this.posx) ){
+		if((avion.posy <= this.posy && avion.posy+50 >= this.posy) && (avion.posx+50 >= this.posx && avion.posx <= this.posx) ){
 			puntos.splice(x, 1);
 			document.getElementById("svg").removeChild(this.punto);
 			puntuacion++;
@@ -146,9 +198,13 @@ class asteroide{
 		this.asteroide.setAttribute("cy",this.posy);
 	}
 	// Funcion para mover los puntos a traves de la pantalla
- mover(){
+ mover(x){
 
 	this.posy = this.posy + this.vy;
+	if(this.posy >= 600){
+	asteroides.splice(x, 1);
+	document.getElementById("svg").removeChild(this.asteroide);
+}
 }
 
 collisionAA(){
@@ -156,7 +212,7 @@ collisionAA(){
 
 	
 
-		if(avion.posy <= this.posy && (avion.posx+50 >= this.posx && avion.posx <= this.posx) ){
+		if((avion.posy <= this.posy && avion.posy+50 >= this.posy) && (avion.posx+50 >= this.posx && avion.posx <= this.posx) ){
 			document.getElementById("svg").removeChild(avion.avion);
 			terminarJuego();
 
@@ -196,112 +252,65 @@ var a = new asteroide(Math.random() * (585),10,4,4,15);
 	}
 }
 
-
-
-
-
-
-
- // funcion que detecta el impacto entre un disparo generado por el avion y un asteroide
-function impactoAD(){
-	
-
-
-	var asteroide = document.getElementsByClassName("a");
-	var disparo = document.getElementsByClassName("disparo")
-	for(var i =0; i < asteroide.length ; i++){
-		for(var x=0; x<disparo.length;x++){
-		var posDy =  parseInt(disparo[x].getAttribute("cy",this.posy));
-		var posDx =  parseInt(disparo[x].getAttribute("cx",this.posx));
-		var posyI =  parseInt(asteroide[i].getAttribute("cy",this.posy));
-		var posyx =  parseInt(asteroide[i].getAttribute("cx",this.posx));
-		if(posDy == posyI && posDx == posyx ){
-			document.getElementById("svg").removeChild(disparo[x]);
-			document.getElementById("svg").removeChild(asteroide[i]);
-		}
-}
-
-}
-}
-
-
-
-
-
-
-
 function crearDisparo(objeto){
-	if(objeto.keyCode == 81  ){
-		var avion = document.getElementById("av")
-	var posyI =  parseInt(avion.getAttribute("y"));
-	var posyx =  parseInt(avion.getAttribute("x"));
-	  new disparo(posyx+25,posyI-30,1,1,10);
+	 a = new  disparo(avion.posx+25,avion.posy-30,1,6,10);
+	disparos.push(a);
+}
+
+
+
+
+
+function mover(objeto){
+	 if(objeto.keyCode == 87){
+            avion.moviendoArriba = true;
+        }
+        if(objeto.keyCode == 83 ){
+            avion.moviendoAbajo = true;
+        }
+        if(objeto.keyCode == 65){
+            avion.moviendoIzquierda = true;
+        }
+        if(objeto.keyCode == 68 ){
+            avion.moviendoDerecha = true;
+        }
+        if(objeto.keyCode == 81 && avion.puedeDisparar){
+         crearDisparo();
+            avion.puedeDisparar = false;
+        }
+}
+
+	function dejarDeMover(objeto){
+    
+	 if(objeto.keyCode == 87){
+            avion.moviendoArriba = false;
+        }
+        if(objeto.keyCode == 83 ){
+            avion.moviendoAbajo = false;
+        }
+        if(objeto.keyCode == 65){
+            avion.moviendoIzquierda = false;
+        }
+        if(objeto.keyCode == 68 ){
+            avion.moviendoDerecha = false;
+        }
+           if(objeto.keyCode == 81){
+            avion.puedeDisparar = true;
+        }
+}
+    
 	
-	disparar();
-}
-
-}
 
 
 
 
 
 	
-	
-
-
-
-
-
-	function mover(objeto){
-	
-	if(objeto.keyCode == 81  ){
-	
-	 a =  new disparo(avion.posx+25,avion.posy-30,1,6,10);
-	 disparos.push(a);
-}
-if(objeto.keyCode == 87  ){
-	if(avion.posy <= 0){
-	}
-	else{
-	avion.posy = avion.posy - 10;
-}
-}
- 	if(objeto.keyCode == 83 ){	
-	if(avion.posy >= 550){
-	}
-	else{
-	avion.posy = avion.posy + 10;
-}
-}
-
-if(objeto.keyCode == 65  ){
-
-	if(avion.posx <= 0){
-	}
-	else{
-	avion.posx = avion.posx -10
-}
-}
-if(objeto.keyCode == 68  ){
-	if(avion.posx >= 550){
-	}
-	else{
-
-
-	avion.posx = avion.posx +10
-}
-}
-
-
-
-
-}
 //Funcion para comenzar el juego y que genere los objetos de este
 function IniciarJuego(){
 
 	
-	a = setInterval(bucle,50);
+	f = setInterval(bucle,50);
 
 }
 function terminarJuego(){
@@ -317,9 +326,42 @@ function terminarJuego(){
 		fin.setAttribute("fill","white");
 		document.getElementById("svg").appendChild(fin);
 
-	clearInterval(a);
+	clearInterval(f);
+}
+function reiniciarJuego(){
+	var elementos = document.querySelectorAll("circle");
+	for(var i = 0 ; i< elementos.length;i++){
+		document.getElementById("svg").removeChild(elementos[i]);
+	}
+
+		for(var i =0;i<asteroides.length;i++){
+			asteroides.shift();
+
+		}
+			for(var i =0;i<puntos.length;i++){
+				puntos.shift();
+		}
+			for(var i =0;i<disparos.length;i++){
+				disparos.shift();
+		}
+		avion = new  Avion(250,550,50,50);
+		IniciarJuego();
+
 }
 function bucle() {
+	 if(avion.moviendoAbajo){
+                avion.mover("abajo");
+            }
+            if(avion.moviendoArriba){
+                avion.mover("arriba");
+            }
+            if(avion.moviendoDerecha){
+                avion.mover("derecha");
+            }
+            if(avion.moviendoIzquierda){
+                avion.mover("izquierda");
+            }
+            
 	addPunto();
 	addAsteroide();
 	
@@ -328,11 +370,11 @@ function bucle() {
 		disparos[i].mover(i);
 		disparos[i].dibuja();
 	}
-	avion.dibuja();
+	
 
 	for(var i =0;i<asteroides.length;i++){
 		asteroides[i].collisionAA();
-		asteroides[i].mover();
+		asteroides[i].mover(i);
 		asteroides[i].dibuja();
 
 	}
@@ -344,5 +386,5 @@ function bucle() {
 	}
 }
 window.onkeydown = mover;
-
+window.onkeyup = dejarDeMover;
 var avion = new Avion(250,550,50,50);
