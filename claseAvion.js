@@ -5,6 +5,7 @@ var disparos = [];
 var contadorp = 0;
 var contadora = 0;
 var puntuacion = 0;
+var existe = true;
 // Clase avion que es nuestro personaje principal en este juego 
 class Avion {
 	constructor(posx,posy,ancho,alto){
@@ -112,19 +113,7 @@ if(this.posy <= -10){
 	 
 
 }
-//Collision disparo con bala
-collisionDA(){
-	var circle1 = {radius: 20, x: 5, y: 5};
-var circle2 = {radius: 12, x: 10, y: 5};
 
-var dx = circle1.x - circle2.x;
-var dy = circle1.y - circle2.y;
-var distance = Math.sqrt(dx * dx + dy * dy);
-
-if (distance < circle1.radius + circle2.radius) {
-    // collision detected!
-}
-}
 
 	}
 
@@ -214,6 +203,7 @@ collisionAA(){
 
 		if((avion.posy <= this.posy && avion.posy+50 >= this.posy) && (avion.posx+50 >= this.posx && avion.posx <= this.posx) ){
 			document.getElementById("svg").removeChild(avion.avion);
+			existe = false;
 			terminarJuego();
 
 
@@ -304,7 +294,25 @@ function mover(objeto){
 
 
 
+//Collision disparo con meteorito
+function collisionDA(disparo,meteorito){
 
+if(Object.keys(disparos).length === 0){
+
+}
+else{
+var dx = disparo.posx - meteorito.posx;
+var dy = disparo.posy - meteorito.posy;
+var distance = Math.sqrt(dx * dx + dy * dy);
+
+if (distance < disparo.radio + meteorito.radio) {
+    return true;
+}
+
+   return false;
+
+}
+}
 	
 //Funcion para comenzar el juego y que genere los objetos de este
 function IniciarJuego(){
@@ -314,7 +322,7 @@ function IniciarJuego(){
 
 }
 function terminarJuego(){
-		p = document.createElement("p");
+	/*	p = document.createElement("p");
 		texto = document.createTextNode(puntuacion);
 		p.appendChild(texto);
 			fin= document.createElementNS("http://www.w3.org/2000/svg","rect");
@@ -324,7 +332,8 @@ function terminarJuego(){
 		fin.setAttribute("width","50");
 		fin.setAttribute("height","50");
 		fin.setAttribute("fill","white");
-		document.getElementById("svg").appendChild(fin);
+		document.getElementById("svg").appendChild(fin);*/
+	
 
 	clearInterval(f);
 }
@@ -344,7 +353,12 @@ function reiniciarJuego(){
 			for(var i =0;i<disparos.length;i++){
 				disparos.shift();
 		}
+		if(existe == true){
+			document.getElementById("svg").removeChild(avion.avion);
+		}
 		avion = new  Avion(250,550,50,50);
+			clearInterval(f);
+			puntuacion = 0;
 		IniciarJuego();
 
 }
@@ -367,10 +381,21 @@ function bucle() {
 	
 
 	for(var i =0;i<disparos.length;i++){
+		for(var j =0;j<asteroides.length;j++){
+			if(collisionDA(disparos[i],asteroides[j])){
+				document.getElementById("svg").removeChild(disparos[i].disparo);
+				document.getElementById("svg").removeChild(asteroides[j].asteroide);
+					disparos.splice(i,1);
+				asteroides.splice(j,1);
+			}
+		}
+		if(Object.keys(disparos).length === 0){
+}
+else{
 		disparos[i].mover(i);
 		disparos[i].dibuja();
 	}
-	
+	}
 
 	for(var i =0;i<asteroides.length;i++){
 		asteroides[i].collisionAA();
@@ -380,11 +405,16 @@ function bucle() {
 	}
 		for(var i =0;i<puntos.length;i++){
 		puntos[i].collisionAP(i);
-		puntos[i].mover();
+		if(Object.keys(puntos).length !== 0){
+			puntos[i].mover();
 		puntos[i].dibuja();
+}
+		
 
 	}
+		document.getElementById("marcador").innerHTML = puntuacion;
 }
+document.getElementById("marcador").setAttribute('border','solid 1px red');
 window.onkeydown = mover;
 window.onkeyup = dejarDeMover;
 var avion = new Avion(250,550,50,50);
